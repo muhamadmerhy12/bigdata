@@ -1,9 +1,10 @@
 from pymongo import MongoClient
+from flask import current_app as app
 
 
 class MovieService:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017/')
+        self.client = MongoClient(app.config['MONGO_URI'])
         self.db = self.client['movie_db']
         self.collection = self.db['movies']
 

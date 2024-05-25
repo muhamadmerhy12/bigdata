@@ -1,35 +1,36 @@
-from flask import Flask, request, jsonify
-from services.movie_service import MovieService
-from services.rating_service import rating_service, consume_ratings
-from services.recommendation_service import recommendation_service
-from threading import Thread
-
-app = Flask(__name__)
-
-# Initialize services
-movie_service = MovieService()
+from flask import Flask, jsonify, request
+from config import Config
+from services.docker_service import DockerService
+from services.rating_service import RatingService
+from services.recommendation_consumer import RecommendationConsumerService
+from services.recommendation_service import RecommendationService
 
 
-@app.route('/movies', methods=['GET'])
-def get_movies():
-    movies = movie_service.get_all_movies()
-    return jsonify(movies)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
+    with app.app_context():
+        DockerService()
+        recommendation_service = RecommendationService()
+        recommendation_consumer = RecommendationConsumerService()
+        recommendation_consumer.start_consumer()
+        rating_service = RatingService()
+        rating_service.start_consumer()
 
-@app.route('/send_rating', methods=['POST'])
-def send_rating():
-    rating_data = request.json
-    return rating_service.send_rating(rating_data)
+    @app.route('/recommendations/<int:user_id>', methods=['GET'])
+    def get_recommendations(user_id):
+        recommendations = recommendation_service.get_recommendations(user_id)
+        return jsonify(recommendations)
 
+    @app.route('/send_rating', methods=['POST'])
+    def send_rating():
+        rating_data = request.json
+        return rating_service.send_rating(rating_data)
 
-@app.route('/recommendations/<int:user_id>', methods=['GET'])
-def get_recommendations(user_id):
-    recommendations = recommendation_service.get_recommendations(user_id)
-    return jsonify(recommendations)
+    return app
 
-
-consumer_thread = Thread(target=consume_ratings, daemon=True)
-consumer_thread.start()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app = create_app()
+    app.run()
