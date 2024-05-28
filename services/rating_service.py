@@ -1,8 +1,10 @@
-from kafka import KafkaProducer, KafkaConsumer
 import json
 import time
-from flask import current_app as app
 from threading import Thread
+
+from flask import current_app as app
+from kafka import KafkaProducer, KafkaConsumer
+
 from services.csv_writer import CSVWriter
 
 
@@ -46,7 +48,7 @@ class RatingService:
     def __init__(self):
         self.producer = initialize_kafka_producer()
         self.consumer = initialize_kafka_consumer()
-        self.csv_writer = CSVWriter(app.config['CSV_FILE_PATH'], ['userId', 'movieId', 'rating'])
+        self.csv_writer = CSVWriter()
 
     def send_rating(self, rating_data):
         try:

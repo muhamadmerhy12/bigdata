@@ -12,3 +12,7 @@ class Config:
     REDIS_DB = os.getenv('REDIS_DB', 0)
     KAFKA_RECOMMENDATIONS_TOPIC = 'recommendations'
     KAFKA_RATINGS_TOPIC = 'ratings'
+    HDFS_URL = 'http://localhost:9870'
+    HDFS_CSV_PATH = '/ratings.csv'
+    HDFS_DIRECTORY_PATH = '/ratings'
+    RATINGS_CSV_PATH = 'ratings.csv'

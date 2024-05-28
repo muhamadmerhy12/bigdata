@@ -12,15 +12,15 @@ def create_app():
 
     with app.app_context():
         DockerService()
+        rating_service = RatingService()
         recommendation_service = RecommendationService()
         recommendation_consumer = RecommendationConsumerService()
         recommendation_consumer.start_consumer()
-        rating_service = RatingService()
         rating_service.start_consumer()
 
     @app.route('/recommendations/<int:user_id>', methods=['GET'])
-    def get_recommendations(user_id):
-        recommendations = recommendation_service.get_recommendations(user_id)
+    def get_recommendations_by_user_id(user_id):
+        recommendations = recommendation_service.get_recommendations_by_user_id(user_id)
         return jsonify(recommendations)
 
     @app.route('/send_rating', methods=['POST'])

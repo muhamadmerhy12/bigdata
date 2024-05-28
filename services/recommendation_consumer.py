@@ -21,11 +21,18 @@ class RecommendationConsumerService:
         for message in consumer:
             record = message.value
             user_id = record['userId']
-            recommendations = record['recommendations']
+            movie_id = int(record["movieId"])
+            rating = float(record["rating"])
 
-            # Convert movieId and rating to correct types if necessary
-            recommendations = [{"movieId": int(rec["movieId"]), "rating": float(rec["rating"])} for rec in
-                               recommendations]
+            # Fetch existing recommendations from Redis
+            existing_recs = self.redis_client.get(f"user:{user_id}:recs")
+            if existing_recs:
+                recommendations = json.loads(existing_recs)
+            else:
+                recommendations = []
+
+            # Append the new recommendation
+            recommendations.append({"movieId": movie_id, "rating": rating})
 
             # Store recommendations in Redis
             self.redis_client.set(f"user:{user_id}:recs", json.dumps(recommendations))
